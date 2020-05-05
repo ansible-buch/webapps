@@ -1,0 +1,28 @@
+---
+version: "3"
+
+services:
+  gitea:
+    image: "gitea/gitea:latest"
+    container_name: gitea
+    environment:
+      - DOMAIN=git.example.org
+      - ROOT_URL=http://git.example.org/
+      - DISABLE_SSH=true
+    volumes:
+      - data:/data
+    networks:
+      - traefik
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.gitea.rule=Host(`git.example.org`)
+      - traefik.http.services.gitea.loadbalancer.server.port=3000
+      - traefik.http.routers.gitea.tls=true
+
+networks:
+  traefik:
+    external: true
+
+volumes:
+  data:

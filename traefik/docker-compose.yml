@@ -1,0 +1,27 @@
+---
+version: "3"
+
+services:
+  traefik:
+    image: "traefik:2.2"
+    container_name: traefik
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      traefik:
+        aliases:
+          - git.example.org
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`traefik.example.org`)
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls=true
+
+networks:
+  traefik:
+    external: true
