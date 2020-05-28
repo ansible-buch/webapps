@@ -8,7 +8,7 @@ git clone -b 11.2.0 https://github.com/ansible/awx.git
 	
 cd awx/installer
 	
-ansible-playbook -i inventory install.yml
+ansible-playbook -i inventory install.yml -e compose_start_containers=false
 ```
 
 Then you get a directory `~/.awx/awxcompose`, which essentially contains
@@ -23,6 +23,10 @@ Removed:
     ports:
       - "80:8052"
 ```
+
+Replaced:
+
+Every `~/.awx/awxcompose` by `./awxcompose`
 
 Added:
 
@@ -41,10 +45,9 @@ To every container:
       - traefik
 ```
 
-To task container:
+To task container, section `environment`:
 
 ```
-    #environment:
       GIT_SSL_NO_VERIFY: 'true'
 ```
 
