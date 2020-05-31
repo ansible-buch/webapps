@@ -5,10 +5,13 @@ services:
   gitea:
     image: "gitea/gitea:latest"
     container_name: gitea
+    ports:
+      - "2222:2222"
     environment:
       - DOMAIN=git.example.org
       - ROOT_URL=http://git.example.org/
-      - DISABLE_SSH=true
+      - SSH_PORT=2222
+
     volumes:
       - data:/data
     networks:
