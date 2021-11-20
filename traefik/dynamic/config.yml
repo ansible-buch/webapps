@@ -1,0 +1,7 @@
+---
+http:
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users: # (Das admin-Passwort ist "geheim")
+          - "admin:$1$Wd0Nn0L/$npI3keEiKLIq33YbTKTyh/"
