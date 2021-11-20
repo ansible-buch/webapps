@@ -8,20 +8,22 @@ services:
       - db
     restart: unless-stopped
     environment:
+      #- POLEMARCH_LOG_LEVEL=DEBUG
+      #- POLEMARCH_DEBUG=true
       - POLEMARCH_DB_TYPE=mysql
       - POLEMARCH_DB_HOST=db
       - POLEMARCH_DB_PORT=3306
       - POLEMARCH_DB_NAME=polemarch
       - POLEMARCH_DB_USER=polemarch
       - POLEMARCH_DB_PASSWORD=polemarch
+      # see: https://about.polemarch.org/en/latest/config.html#database-settings
       - "DB_INIT_CMD=SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'"
-      - POLEMARCH_LOG_LEVEL=DEBUG
-      - POLEMARCH_DEBUG=true
     volumes:
       - projects:/projects 
       - hooks:/hooks   
     networks:
       - traefik
+      - backend
     labels:
       - traefik.enable=true
       - traefik.http.routers.polemarch.rule=Host(`polemarch.example.org`)
@@ -29,8 +31,11 @@ services:
       - traefik.http.routers.polemarch.tls=true
 
   db:
-    image: "mysql:5.7"
+    image: "mysql:8"
     container_name: polemarch_db
+    command:
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
     volumes:
       - data:/var/lib/mysql
     environment:
@@ -39,10 +44,11 @@ services:
       - MYSQL_USER=polemarch
       - MYSQL_PASSWORD=polemarch
     networks:
-      - traefik
+      - backend
     restart: unless-stopped
 
 networks:
+  backend:
   traefik:
     external: true
     
