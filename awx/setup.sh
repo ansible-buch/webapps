@@ -1,9 +1,23 @@
 #!/bin/sh
 
-COMPOSE_DIR=awxcompose
+AWX_VERSION=17.1.0
+AWX_ADMIN_PASSWORD=password
 
-install -d -m 777 $COMPOSE_DIR/redis_socket
-install -d -m 777 $COMPOSE_DIR/memcached_socket
 
-chmod 666 $COMPOSE_DIR/redis.conf
-chmod 600 $COMPOSE_DIR/SECRET_KEY
+git clone -b $AWX_VERSION https://github.com/ansible/awx.git
+
+pushd awx/installer
+
+ansible-playbook -i inventory install.yml \
+		 -e compose_start_containers=false \
+		 -e admin_password=$AWX_ADMIN_PASSWORD
+
+popd
+
+ansible-playbook modify-compose-file.yml
+
+
+cd ~/.awx/awxcompose
+docker-compose run --rm --service-ports task awx-manage migrate --no-input
+
+docker-compose up -d --remove-orphans
