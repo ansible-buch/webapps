@@ -1,0 +1,54 @@
+---
+- hosts: localhost
+  gather_facts: false
+
+  vars:
+    compose_file: ~/.awx/awxcompose/docker-compose.yml
+
+  tasks:
+    - lineinfile:
+        path: "{{compose_file}}"
+        regexp: "{{item}}"
+        state: absent
+      with_items:
+        - "ports:"
+        - "80:8052"
+
+    - blockinfile:
+        path: "{{compose_file}}"
+        insertafter: "hostname: awxweb"
+        block: |2
+              labels:
+                - traefik.enable=true
+                - traefik.http.routers.awx.rule=Host(`awx.example.org`)
+                - traefik.http.services.awx.loadbalancer.server.port=8052
+                - traefik.http.routers.awx.tls=true
+              networks:
+                - traefik
+        marker: "# {mark} awx_web"
+
+    - blockinfile:
+        path: "{{compose_file}}"
+        insertafter: "container_name: {{item}}"
+        block: |2
+              networks:
+                - traefik
+        marker: "# {mark} {{item}}"
+      with_items:
+        - awx_task
+        - awx_redis
+        - awx_postgres
+
+    - lineinfile:
+        path: "{{compose_file}}"
+        insertafter: "SUPERVISOR_WEB_CONFIG_PATH"
+        line: "      GIT_SSL_NO_VERIFY: 'true'"
+        
+
+    - blockinfile:
+        path: "{{compose_file}}"
+        marker: "# {mark} networks"
+        block: |
+          networks:
+            traefik:
+              external: true
