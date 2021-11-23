@@ -21,3 +21,6 @@ cd ~/.awx/awxcompose
 docker-compose run --rm --service-ports task awx-manage migrate --no-input
 
 docker-compose up -d --remove-orphans
+
+# Load demo data:
+# docker exec awx_task bash -c "/usr/bin/awx-manage create_preload_data"
